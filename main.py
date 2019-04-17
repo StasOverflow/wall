@@ -33,14 +33,13 @@ class Wall:
         # if len(wall_seq) > 1:
         #     end = start + 1
         # else:
-        end = start
+        end = start_index
             # return start, end
 
         compare_value = wall_seq[start_index]
-        for sub_ind, value in enumerate(wall_seq):
+        for sub_ind, value in enumerate(wall_seq[1:]):
             if compare_value <= value:
-                if sub_ind is not 0:
-                    end = sub_ind
+                end = sub_ind
             else:
                 break
         return start, end
@@ -51,10 +50,11 @@ class Wall:
             self.working_h_list = [height for height in self.heights]
             wall_seq = self.working_h_list
 
+        print(wall_seq)
         for index, height in enumerate(wall_seq):
             if height:
                 start, end = self._get_block_start_end_index(index, wall_seq)
-                print(wall_seq)
+                # print(wall_seq)
                 print(start, end)
                 if start != end:
                     sub_list = list()
@@ -62,22 +62,23 @@ class Wall:
                         wall_seq[ind] = 0
                         sub_list.append(val)
 
-                    min_value = min(sub_list)
-                    sub_list = [h - min_value for h in sub_list]
-                    print(sub_list)
-                    block_count += self.calculate_blocks(sub_list)
+                    if sub_list:
+                        min_value = min(sub_list)
+                        sub_list = [h - min_value for h in sub_list]
+                        # print(sub_list)
+                        block_count += self.calculate_blocks(sub_list)
                 block_count += 1
 
         return block_count
 
 
 if __name__ == '__main__':
-    # the_wall = Wall(heights=[8, 8, 5, 8, 5, 7, 9, 8, 7, 4, 8], length=11)
-    # print(the_wall.heights)
-    # the_wall.min_blocks_required()
-
-    the_wall = Wall(heights=[8, 8, 8], length=3)
+    the_wall = Wall(heights=[8, 8, 5, 7, 9, 8, 7, 4, 8], length=9)
+    print(the_wall.heights)
     print(the_wall.calculate_blocks())
+
+    # the_wall = Wall(heights=[5, 5, 8, 4], length=4)
+    # print(the_wall.calculate_blocks())
 
     # the_wall = Wall(heights=[8], length=1)
     # print(the_wall.calculate_blocks())
