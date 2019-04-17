@@ -26,11 +26,18 @@ class Wall:
         self.length = randint(1, 1000000)
         self.heights = [randint(1, 1000000000) for _ in range(self.length)]
 
-    def calculate_block(self, height):
-        block_height = 0
-        block_width = 0
-        return block_height, block_width
-
+    def calculate_blocks(self, wall_seq):
+        block_count = 0
+        while len(wall_seq):
+            min_value = min(wall_seq)
+            if min_value:
+                print(wall_seq)
+                wall_seq = [h - min_value for h in wall_seq if h - min_value]
+            else:
+                break
+            block_count += 1
+        print('bk is ', block_count)
+        return block_count
 
     def min_blocks_required(self):
         """
@@ -44,19 +51,32 @@ class Wall:
         meters_covered = 0
 
         height_list = [height for height in self.heights]
-        while meters_covered < self.length:
-            start_index = 0
-            start_height = height_list[start_index]
-            end_index = 1
-            while height_list[start_index] <= height_list[end_index]:
-                end_index += 1
-                print(end_index)
-            for index, height in enumerate(height_list[:end_index]):
-                height_list[index] = height - start_height
-            height_list = [h for h in height_list if h is not 0]
-            meters_covered = self.length - len(height_list)
-            print('list is {0}\n, '
-                  'meters covered: {1}'.format(height_list, meters_covered))
+        for index, height in enumerate(height_list):
+            if height:
+                start_index = index
+                end_index = start_index + 1
+                if end_index < self.length-1:
+                    while height_list[start_index] <= height_list[end_index]:
+                        end_index += 1
+                    sub_list = height_list[start_index:end_index]
+                    height_list[start_index] = 0
+                    height_list[end_index] = 0
+                    block_count += self.calculate_blocks(sub_list)
+        print(block_count)
+
+        # while meters_covered < self.length:
+        #     start_index = 0
+        #     start_height = height_list[start_index]
+        #     end_index = 1
+        #     while height_list[start_index] <= height_list[end_index]:
+        #         end_index += 1
+        #         print(end_index)
+        #     for index, height in enumerate(height_list[:end_index]):
+        #         height_list[index] = height - start_height
+        #     height_list = [h for h in height_list if h is not 0]
+        #     meters_covered = self.length - len(height_list)
+        #     print('list is {0}\n, '
+        #           'meters covered: {1}'.format(height_list, meters_covered))
 
         minimal = min(height_list)
         # height_list = [height-minimal for height in self.heights]
@@ -65,5 +85,5 @@ class Wall:
 
 if __name__ == '__main__':
     the_wall = Wall(heights=[8, 8, 5, 7, 9, 8, 7, 4, 8], length=9)
+    print(the_wall.heights)
     the_wall.min_blocks_required()
-    # print(the_wall.heights)
