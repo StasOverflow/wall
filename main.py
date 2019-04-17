@@ -18,6 +18,8 @@ class Wall:
             self.heights = heights
             self.length = length
 
+        self.working_h_list = None
+
     def _generate(self):
         """
         Generates the wall of [1..100,000] meters long
@@ -26,64 +28,56 @@ class Wall:
         self.length = randint(1, 1000000)
         self.heights = [randint(1, 1000000000) for _ in range(self.length)]
 
-    def calculate_blocks(self, wall_seq):
-        block_count = 0
-        while len(wall_seq):
-            min_value = min(wall_seq)
-            if min_value:
-                print(wall_seq)
-                wall_seq = [h - min_value for h in wall_seq if h - min_value]
+    def _get_block_start_end_index(self, start_index, wall_seq):
+        start = start_index
+        # if len(wall_seq) > 1:
+        #     end = start + 1
+        # else:
+        end = start
+            # return start, end
+
+        compare_value = wall_seq[start_index]
+        for sub_ind, value in enumerate(wall_seq):
+            if compare_value <= value:
+                if sub_ind is not 0:
+                    end = sub_ind
             else:
                 break
-            block_count += 1
-        print('bk is ', block_count)
-        return block_count
+        return start, end
 
-    def min_blocks_required(self):
-        """
-        Represents `int solution(int H[], int N);`,
-        where H is self.heights attribute class
-        and   N is self.length attribute class
-
-        :return: minimum number of blocks required to build the wall
-        """
+    def calculate_blocks(self, wall_seq=None):
         block_count = 0
-        meters_covered = 0
+        if wall_seq is None:
+            self.working_h_list = [height for height in self.heights]
+            wall_seq = self.working_h_list
 
-        height_list = [height for height in self.heights]
-        for index, height in enumerate(height_list):
+        for index, height in enumerate(wall_seq):
             if height:
-                start_index = index
-                end_index = start_index + 1
-                if end_index < self.length-1:
-                    while height_list[start_index] <= height_list[end_index]:
-                        end_index += 1
-                    sub_list = height_list[start_index:end_index]
-                    height_list[start_index] = 0
-                    height_list[end_index] = 0
+                start, end = self._get_block_start_end_index(index, wall_seq)
+                print(wall_seq)
+                print(start, end)
+                if start != end:
+                    sub_list = list()
+                    for ind, val in enumerate(wall_seq[start:end+1]):
+                        wall_seq[ind] = 0
+                        sub_list.append(val)
+
+                    min_value = min(sub_list)
+                    sub_list = [h - min_value for h in sub_list]
+                    print(sub_list)
                     block_count += self.calculate_blocks(sub_list)
-        print(block_count)
+                block_count += 1
 
-        # while meters_covered < self.length:
-        #     start_index = 0
-        #     start_height = height_list[start_index]
-        #     end_index = 1
-        #     while height_list[start_index] <= height_list[end_index]:
-        #         end_index += 1
-        #         print(end_index)
-        #     for index, height in enumerate(height_list[:end_index]):
-        #         height_list[index] = height - start_height
-        #     height_list = [h for h in height_list if h is not 0]
-        #     meters_covered = self.length - len(height_list)
-        #     print('list is {0}\n, '
-        #           'meters covered: {1}'.format(height_list, meters_covered))
-
-        minimal = min(height_list)
-        # height_list = [height-minimal for height in self.heights]
         return block_count
 
 
 if __name__ == '__main__':
-    the_wall = Wall(heights=[8, 8, 5, 7, 9, 8, 7, 4, 8], length=9)
-    print(the_wall.heights)
-    the_wall.min_blocks_required()
+    # the_wall = Wall(heights=[8, 8, 5, 8, 5, 7, 9, 8, 7, 4, 8], length=11)
+    # print(the_wall.heights)
+    # the_wall.min_blocks_required()
+
+    the_wall = Wall(heights=[8, 8, 8], length=3)
+    print(the_wall.calculate_blocks())
+
+    # the_wall = Wall(heights=[8], length=1)
+    # print(the_wall.calculate_blocks())
