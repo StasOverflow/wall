@@ -1,3 +1,31 @@
+"""
+ver 0.2
+
+Uses a bit different algorithm then the one, given in example,
+
+It relies more on wall-wide horizontal blocks (the task description did not
+mention any sanity restrictions, so we assume that the wall can have a
+wall-wide blocks)
+
+i.e: original algorithm would split [4, 4, 2, 3, 1, 5] wall into 5 blocks
+    - 2x4, 2x2. 1x1, 2x1, 1x4
+
+    the given one would provide
+    -6x1, 4x1, 2x2, 1x1, 1x4
+
+    Note: blocks are represented as `length x height`
+
+On small walls it seems as efficient as the one given in the example
+
+Caution: Block calculations takes some time!!
+
+
+- author note: I hope efficient algorithm didn't meant to be efficient in
+               terms of speed
+
+TODO: Increase algorithm's efficiency
+"""
+
 from random import randint
 
 
@@ -9,14 +37,23 @@ class Wall:
         -generation (from given arrays or randomly)
         -minimum block_computation
     """
-    def __init__(self, heights=None, length=None):
+    def __init__(self, heights=None, **kwargs):
+        """
+        Create a wall
 
-        if heights is None or length is None:
+        Note: if no arguments were provided, the wall will be generated
+              automatically
+
+        :param heights: list of wall's max heights for every given meter
+                        `H[]` From original task
+        :param **kwargs: used for backward compatibility, previous version
+                         specified length, which was unnecessary
+        """
+        if heights is None:
             self._generate()
         else:
-            assert len(heights) == length
             self.heights = heights
-            self.length = length
+            self.length = len(heights)
 
         self.working_h_list = None
 
@@ -30,6 +67,11 @@ class Wall:
 
     @staticmethod
     def split_sequence(seq):
+        """
+        Splits list of given integers into sequences
+        :param seq:
+        :return:
+        """
         group = []
         for index, num in enumerate(seq):
             if num:
@@ -38,51 +80,10 @@ class Wall:
                 yield list(group)
                 group = []
 
-    def _get_block_start_end_index(self, start_index, wall_seq):
-        start = start_index
-        # if len(wall_seq) > 1:
-        #     end = start + 1
-        # else:
-        end = start_index
-            # return start, end
-
-        compare_value = wall_seq[start_index]
-        for sub_ind, value in enumerate(wall_seq[1:]):
-            if compare_value <= value:
-                end = sub_ind
-            else:
-                break
-        return start, end
-
-    def calculate_blocks(self, wall_seq=None):
-        block_count = 0
-        if wall_seq is None:
-            self.working_h_list = [height for height in self.heights]
-            wall_seq = self.working_h_list
-
-        print(wall_seq)
-        for index, height in enumerate(wall_seq):
-            if height:
-                start, end = self._get_block_start_end_index(index, wall_seq)
-                # print(wall_seq)
-                print(start, end)
-                if start != end:
-                    sub_list = list()
-                    for ind, val in enumerate(wall_seq[start:end+1]):
-                        wall_seq[ind] = 0
-                        sub_list.append(val)
-
-                    if sub_list:
-                        min_value = min(sub_list)
-                        sub_list = [h - min_value for h in sub_list]
-                        # print(sub_list)
-                        block_count += self.calculate_blocks(sub_list)
-                block_count += 1
-
-        return block_count
-
-    def calc(self, wall_sequence=None):
+    def calculate_blocks(self, wall_sequence=None):
         """
+        Representation of `int solution(args)` from original task.
+
         Step 1: get min value for all blocks off the wall sequence
                 (that can be subtracted from every meter, thus making
                  us count it as a block, incrementing block count by 1)
@@ -120,33 +121,20 @@ class Wall:
 
         # Step 2:
         if sum(wall_sub_sequence):
-            # Get wall subsequences
+            # Get wall sub_sequences
             sub_sequences = list(self.split_sequence(wall_sub_sequence))
 
             for seq in sub_sequences:
-                block_count += self.calc(seq)
+                block_count += self.calculate_blocks(seq)
 
         # Step 3:
         return block_count
 
 
-
 if __name__ == '__main__':
-    the_wall = Wall(heights=[8, 8, 5, 7, 9, 8, 7, 4, 8], length=9)
+    the_wall = Wall(heights=[8, 8, 5, 8, 5, 7, 9, 8, 7, 4, 8], length=11)
     print(the_wall.heights)
-    print(the_wall.calc())
+    print(the_wall.calculate_blocks())
 
-    # the_wall = Wall(heights=[5, 5, 8, 4], length=4)
-    # print(the_wall.calculate_blocks())
-
-    # the_wall = Wall(heights=[8], length=1)
-    # print(the_wall.calculate_blocks())
-
-    arr = [8, 8, 5, 7, 9, 8, 7, 4, 8]
-    # arr = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-
-    # if sum(arr):
-    #     print('has pos ints')
-    # else:
-    #     print('pos ints are missing')
+    the_wall = Wall()
+    print(the_wall.calculate_blocks())
