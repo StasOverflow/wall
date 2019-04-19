@@ -37,7 +37,7 @@ class Wall:
         -generation (from given arrays or randomly)
         -minimum block_computation
     """
-    def __init__(self, heights=None, **kwargs):
+    def __init__(self, heights=None, *args, **kwargs):
         """
         Create a wall
 
